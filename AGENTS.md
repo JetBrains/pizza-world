@@ -53,20 +53,24 @@ Push the feature branch to trigger a Vercel preview deployment:
 git push -u origin feature/<short-name>
 ```
 
-Vercel automatically creates a preview deployment for every branch push. The preview URL format is:
+Vercel automatically creates a preview deployment for every branch push.
+
+To get the preview URL, check GitHub commit statuses:
+```bash
+gh api repos/AlexanderPrendota/pizza-world/commits/$(git rev-parse HEAD)/statuses --jq '
+  .[] | select(.context | contains("vercel")) | .target_url
+'
 ```
-https://pizza-world-<hash>-<vercel-user>.vercel.app
+
+The preview URL format is:
+```
+https://pizza-world-git-feature-<short-name>-alexanderprendotas-projects.vercel.app
 ```
 
 ### 6. Summary
 
-**Always** include the following in your task summary:
+**Always** end your task summary with a clickable Vercel preview link. Use this exact format:
 
-- What was changed (backend + frontend)
-- The branch name
-- The Vercel preview URL (check Vercel dashboard or GitHub deployment status)
-
-Example summary:
 ```
 ## Done
 
@@ -74,6 +78,8 @@ Added pizza ratings feature:
 - Backend: `rating` field on Pizza entity, `GET /api/pizzas/top` endpoint, tests
 - Frontend: star rating display in gallery items with mock fallback
 
-Branch: `feature/pizza-ratings`
-Preview: https://pizza-world-git-feature-pizza-ratings-<user>.vercel.app
+**Branch:** `feature/pizza-ratings`
+**Preview:** [https://pizza-world-git-feature-pizza-ratings-alexanderprendotas-projects.vercel.app](https://pizza-world-git-feature-pizza-ratings-alexanderprendotas-projects.vercel.app)
 ```
+
+The preview URL **must** be a full clickable link (markdown or plain URL), not a code block.
