@@ -48,7 +48,7 @@ export function Cart({ items, onRemove, onOrderPlaced, open, onClose }: Props) {
             <div className="cart-item-info">
               <span className="cart-item-name">{item.pizza.name}</span>
               <span className="cart-item-qty">
-                {item.quantity} &times; {item.pizza.price} &#8381;
+                {item.quantity} &times; {item.pizza.price} $
               </span>
             </div>
             <button className="btn-remove" onClick={() => onRemove(item.pizza.id)}>&times;</button>
@@ -64,7 +64,7 @@ export function Cart({ items, onRemove, onOrderPlaced, open, onClose }: Props) {
         <div className="cart-footer">
           <div className="cart-total">
             <span>Total</span>
-            <span>{total} &#8381;</span>
+            <span>{total} $</span>
           </div>
           <div className="cart-form">
             <input

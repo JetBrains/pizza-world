@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { PizzaMenu } from './components/PizzaMenu';
 import { Cart } from './components/Cart';
 import { Orders } from './components/Orders';
@@ -12,27 +12,18 @@ const heroImages = [
   'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1920&q=80',
   'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1920&q=80',
   'https://images.unsplash.com/photo-1588315029754-2dd089d39a1a?w=1920&q=80',
+  'https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=1920&q=80',
 ];
 
 function App() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [tab, setTab] = useState<Tab>('menu');
   const [cartOpen, setCartOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [heroIndex, setHeroIndex] = useState(Math.floor(Math.random() * heroImages.length));
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setHeroIndex(prev => (prev + 1) % heroImages.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, []);
+  const heroSrc = useMemo(
+    () => heroImages[Math.floor(Math.random() * heroImages.length)],
+    []
+  );
 
   const addToCart = useCallback((pizza: CartItem['pizza']) => {
     setCart(prev => {
@@ -59,75 +50,69 @@ function App() {
 
   return (
     <>
-      <header className={`header ${scrolled ? 'scrolled' : ''}`}>
-        <div className="logo">
-          Pizza <span>World</span>
+      <nav className="nav">
+        <div className="nav-inner">
+          <span className="nav-logo" onClick={() => setTab('menu')}>
+            Pizza World
+          </span>
+          <div className="nav-links">
+            <button
+              className={`nav-link ${tab === 'menu' ? 'active' : ''}`}
+              onClick={() => setTab('menu')}
+            >
+              menu
+            </button>
+            <button
+              className={`nav-link ${tab === 'orders' ? 'active' : ''}`}
+              onClick={() => setTab('orders')}
+            >
+              orders
+            </button>
+            <button className="nav-link" onClick={() => setCartOpen(true)}>
+              cart{totalItems > 0 && <span className="badge">{totalItems}</span>}
+            </button>
+          </div>
         </div>
-        <nav className="nav">
-          <button
-            className={`nav-btn ${tab === 'menu' ? 'active' : ''}`}
-            onClick={() => setTab('menu')}
-          >
-            Menu
-          </button>
-          <button
-            className={`nav-btn ${tab === 'orders' ? 'active' : ''}`}
-            onClick={() => setTab('orders')}
-          >
-            Orders
-          </button>
-          <button className="cart-toggle" onClick={() => setCartOpen(true)}>
-            Cart
-            {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
-          </button>
-        </nav>
-      </header>
+      </nav>
 
-      <main className="main">
+      <div className="page-wrap">
         {tab === 'menu' ? (
           <>
             <section className="hero">
-              <div className="hero-image-container">
-                {heroImages.map((src, i) => (
-                  <img
-                    key={src}
-                    src={src}
-                    alt="Neapolitan pizza"
-                    className={`hero-image ${i === heroIndex ? 'active' : ''}`}
-                  />
-                ))}
-              </div>
-              <div className="hero-overlay" />
-              <div className="hero-content">
-                <p className="hero-subtitle">Authentic Neapolitan</p>
-                <h1 className="hero-title">
-                  The Art of<br /><em>Pizza</em>
-                </h1>
-              </div>
-              <span className="hero-scroll">scroll</span>
+              <img src={heroSrc} alt="Neapolitan pizza" />
             </section>
 
-            <section className="menu-section">
-              <div className="menu-header">
-                <div>
-                  <p className="section-label">Our Selection</p>
-                  <h2 className="menu-title">La Carta</h2>
-                </div>
-              </div>
+            <section className="intro">
+              <p>
+                We craft <em>authentic Neapolitan pizza</em> using traditional
+                recipes, San Marzano tomatoes, and fresh mozzarella — baked in a
+                wood-fired oven at 485°C for exactly 90 seconds.
+              </p>
+            </section>
+
+            <section className="gallery">
               <PizzaMenu onAddToCart={addToCart} />
             </section>
           </>
         ) : (
           <Orders />
         )}
-      </main>
 
-      <footer className="footer">
-        <span className="footer-text">Pizza World</span>
-        <span className="footer-text">Napoli Tradition</span>
-      </footer>
+        <footer className="footer">
+          <div className="footer-col">
+            <span className="footer-logo">Pizza World</span>
+          </div>
+          <div className="footer-col">
+            <span className="footer-label">Contact</span>
+            <span className="footer-text">hello@pizzaworld.com</span>
+          </div>
+          <div className="footer-col">
+            <span className="footer-label">Location</span>
+            <span className="footer-text">Naples, Italy</span>
+          </div>
+        </footer>
+      </div>
 
-      {/* Cart slide-out panel */}
       <div
         className={`cart-overlay ${cartOpen ? 'open' : ''}`}
         onClick={() => setCartOpen(false)}

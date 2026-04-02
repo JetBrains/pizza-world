@@ -12,9 +12,10 @@ const pizzaImages: Record<string, string> = {
   'Quattro Formaggi': 'https://images.unsplash.com/photo-1573821663912-569905455b1c?w=800&q=80',
   'Diavola': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80',
   'Prosciutto': 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80',
+  'Napoletana': 'https://images.unsplash.com/photo-1588315029754-2dd089d39a1a?w=800&q=80',
 };
 
-const defaultImage = 'https://images.unsplash.com/photo-1588315029754-2dd089d39a1a?w=800&q=80';
+const defaultImage = 'https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=800&q=80';
 
 function getImageForPizza(name: string): string {
   for (const [key, url] of Object.entries(pizzaImages)) {
@@ -37,26 +38,39 @@ export function PizzaMenu({ onAddToCart }: Props) {
   if (loading) return <div className="loading">Loading...</div>;
 
   return (
-    <div className="pizza-grid">
-      {pizzas.map(pizza => (
-        <div key={pizza.id} className="pizza-card" onClick={() => onAddToCart(pizza)}>
-          <img
-            src={getImageForPizza(pizza.name)}
-            alt={pizza.name}
-            className="pizza-card-image"
-            loading="lazy"
-          />
-          <div className="pizza-card-overlay" />
-          <div className="pizza-card-content">
-            <h3 className="pizza-card-name">{pizza.name}</h3>
-            <p className="pizza-card-desc">{pizza.description}</p>
-            <div className="pizza-card-meta">
-              <span className="pizza-card-price">{pizza.price} &#8381;</span>
-              <span className="pizza-card-size">{pizza.size}</span>
+    <>
+      {pizzas.map((pizza, i) => (
+        <div
+          key={pizza.id}
+          className={`gallery-item ${i % 2 === 1 ? 'reverse' : ''}`}
+          onClick={() => onAddToCart(pizza)}
+        >
+          <div className="gallery-img">
+            <img
+              src={getImageForPizza(pizza.name)}
+              alt={pizza.name}
+              loading="lazy"
+            />
+          </div>
+          <div className="gallery-info">
+            <h3 className="gallery-name">{pizza.name}</h3>
+            <p className="gallery-desc">{pizza.description}</p>
+            <div className="gallery-meta">
+              <span className="gallery-price">${pizza.price}</span>
+              <span className="gallery-size">{pizza.size}</span>
             </div>
+            <button
+              className="gallery-add"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCart(pizza);
+              }}
+            >
+              Add to cart
+            </button>
           </div>
         </div>
       ))}
-    </div>
+    </>
   );
 }

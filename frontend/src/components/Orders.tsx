@@ -26,23 +26,22 @@ export function Orders() {
   }
 
   return (
-    <section className="orders-section">
-      <p className="section-label">History</p>
-      <h2 className="orders-title">Your Orders</h2>
+    <section className="orders-page">
+      <h2 className="page-title">Orders</h2>
       <div className="orders-list">
         {orders.map(order => (
-          <div key={order.id} className="order-card">
-            <span className="order-id">#{order.id}</span>
+          <div key={order.id} className="order-row">
+            <span className="order-num">#{order.id}</span>
             <div className="order-info">
               <h3>{order.customerName}</h3>
               <p className="order-pizzas">
                 {order.pizzas.map(p => p.name).join(', ')}
               </p>
             </div>
-            <p className="order-meta">
+            <span className="order-date">
               {new Date(order.createdAt).toLocaleString('ru-RU')}
-            </p>
-            <span className={`status-badge status-${order.status}`}>
+            </span>
+            <span className={`status-pill status-${order.status}`}>
               {order.status}
             </span>
           </div>
