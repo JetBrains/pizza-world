@@ -1,0 +1,22 @@
+export interface Pizza {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  size: string;
+}
+
+export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'DELIVERED' | 'CANCELLED';
+
+export interface PizzaOrder {
+  id: number;
+  customerName: string;
+  pizzas: Pizza[];
+  status: OrderStatus;
+  createdAt: string;
+}
+
+export interface CartItem {
+  pizza: Pizza;
+  quantity: number;
+}
