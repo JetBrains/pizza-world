@@ -11,12 +11,23 @@ Pizza World is a fullstack app: Spring Boot 4 (Java 21, H2) backend + React 19 (
 - **Build:** Gradle (backend), npm (frontend)
 - **Deploy:** Vercel (frontend only)
 
+## Jira
+
+Tasks for this repository live in Jira project **PZG**: https://jetbrains-team-bitdsbm5.atlassian.net/jira/software/projects/PZG/boards
+
+- Work only on issues from project `PZG`. When given an issue key (e.g. `PZG-1`), read the issue first: summary, description, acceptance criteria.
+- Move the issue to **In Progress** when you start.
+- Include the issue key in the branch name and every commit message (this links them to the issue in Jira):
+  - Branch: `feature/PZG-1-short-name` (use `fix/PZG-6-short-name` for bugs)
+  - Commit: `PZG-1: Add pizza ratings endpoint`
+- When done: add a comment to the issue with a short summary, the branch name and the Vercel preview URL, then move it to **In Review**.
+
 ## How to Work on Tasks
 
 ### 1. Create a feature branch
 
 ```
-git checkout -b feature/<short-name>
+git checkout -b feature/PZG-<number>-<short-name>
 ```
 
 ### 2. Backend changes (Spring Boot)
@@ -50,7 +61,7 @@ git checkout -b feature/<short-name>
 Push the feature branch:
 
 ```
-git push -u origin feature/<short-name>
+git push -u origin feature/PZG-<number>-<short-name>
 ```
 
 Deploy a preview using the Vercel CLI and grab the URL. The `frontend/` directory is already linked to the Vercel project via the committed `frontend/.vercel/project.json` — do not run `vercel link` and do not change the project:
@@ -68,11 +79,12 @@ This prints the preview URL (e.g. `https://pizza-world-github-<hash>-junie.verce
 ```
 ## Done
 
-Added pizza ratings feature:
+PZG-1 — Added pizza ratings feature:
 - Backend: `rating` field on Pizza entity, `GET /api/pizzas/top` endpoint, tests
 - Frontend: star rating display in gallery items with mock fallback
 
-**Branch:** `feature/pizza-ratings`
+**Jira:** https://jetbrains-team-bitdsbm5.atlassian.net/browse/PZG-1
+**Branch:** `feature/PZG-1-pizza-ratings`
 **Preview:** https://pizza-world-github-abc123-junie.vercel.app
 ```
 

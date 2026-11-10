@@ -7,10 +7,12 @@ Frontend deployed to Vercel. Backend is not deployed — frontend uses mock data
 
 ## Task workflow
 
-1. Create a feature branch from `main`:
+0. Take the task from Jira project `PZG` (see the Jira section in AGENTS.md) and move it to In Progress.
+
+1. Create a feature branch from `main` (include the Jira key):
    ```
    git checkout main && git pull
-   git checkout -b feature/<short-name>
+   git checkout -b feature/PZG-<number>-<short-name>
    ```
 
 2. Implement changes in backend and/or frontend (see AGENTS.md for file locations).
@@ -24,8 +26,8 @@ Frontend deployed to Vercel. Backend is not deployed — frontend uses mock data
 4. Commit and push the branch:
    ```
    git add -A
-   git commit -m "<description>"
-   git push -u origin feature/<short-name>
+   git commit -m "PZG-<number>: <description>"
+   git push -u origin feature/PZG-<number>-<short-name>
    ```
 
 5. **Deploy to Vercel and get the preview URL** — use the Vercel CLI:
@@ -44,7 +46,8 @@ Frontend deployed to Vercel. Backend is not deployed — frontend uses mock data
 
 <What was changed — bullet points for backend and frontend>
 
-**Branch:** `feature/<short-name>`
+**Jira:** https://jetbrains-team-bitdsbm5.atlassian.net/browse/PZG-<number>
+**Branch:** `feature/PZG-<number>-<short-name>`
 **Preview:** <actual URL from `vercel` CLI output>
 ```
 
@@ -58,3 +61,4 @@ The preview URL **must** come from the `vercel` CLI output. Do not guess or cons
 - **No Lombok.** Standard Java getters/setters.
 - **UI style:** Minimal, lots of whitespace. Serif headings (DM Serif Display), sans-serif body (Inter). See current `App.css` for reference.
 - **English only** in code, comments, and UI text. Prices in USD ($).
+- **Jira:** after deploying, comment on the `PZG` issue with the summary, branch and preview URL, then move it to In Review.
