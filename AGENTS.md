@@ -32,7 +32,8 @@ The frontend calls a Vercel Function, `frontend/api/checkout.ts` (`POST /api/che
 
 - `level`: `info` (200), `warn` (400, bad input), `error` (500, a bug). A function timeout shows up as a 504 with no JSON line.
 - Read logs: `cd frontend && vercel logs <deployment-url>`
-- Fault injection for demos: the Vercel env var `CHECKOUT_FAULT` = `error` | `slow` | `bad-promo` (optional `CHECKOUT_FAULT_RATE` 0..1). Do not change it unless the task asks you to.
+- Chaos API (fault injection for demos, no redeploy): `GET https://pizza-world-github.vercel.app/api/chaos` shows the current fault; `POST`/`DELETE` need `Authorization: Bearer $CHAOS_TOKEN`. Scenarios: `error` | `slow` | `bad-promo`. Do not change it unless the task asks you to.
+- Skills: `.claude/skills/chaos-trigger/SKILL.md` (provoke an incident) and `.claude/skills/incident-fix/SKILL.md` (handle an incident end to end) — follow them step by step.
 - Synthetic monitor: `BASE_URL=<deployment-url> npm run synthetic --prefix frontend` — exits non-zero if checkout is broken. It also runs every 15 minutes against production.
 
 When fixing an incident: reproduce it from the log line (`error`, `stack`, `requestId`), add a regression test in `frontend/tests/`, deploy a preview, and run the synthetic monitor against the **preview URL**. Include the result in the Jira comment.
