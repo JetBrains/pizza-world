@@ -1,4 +1,4 @@
-import type { Pizza, PizzaOrder, OrderStatus } from './types';
+import type { Pizza, PizzaOrder, OrderStatus, CartItem, CheckoutQuote } from './types';
 
 const API_BASE = '/api';
 
@@ -42,4 +42,15 @@ export async function updateOrderStatus(orderId: number, status: OrderStatus): P
   return tryFetch(`${API_BASE}/orders/${orderId}/status?status=${status}`, {
     method: 'PATCH',
   });
+}
+
+/** Server-side price quote from the /api/checkout Vercel Function; falls back to a local calculation. */
+export async function checkout(items: CartItem[]): Promise<CheckoutQuote> {
+  const subtotal = items.reduce((sum, item) => sum + item.pizza.price * item.quantity, 0);
+  const fallback: CheckoutQuote = { subtotal, discount: 0, total: subtotal, promoCode: null, currency: 'USD' };
+  return tryFetch(`${API_BASE}/checkout`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items: items.map(item => ({ pizzaId: item.pizza.id, quantity: item.quantity })) }),
+  }, fallback);
 }

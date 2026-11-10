@@ -22,6 +22,21 @@ Tasks for this repository live in Jira project **PZG**: https://jetbrains-team-b
   - Commit: `PZG-1: Add pizza ratings endpoint`
 - When done: add a comment to the issue with a short summary, the branch name and the Vercel preview URL, then move it to **In Review**.
 
+## Runtime logs & incidents
+
+The frontend calls a Vercel Function, `frontend/api/checkout.ts` (`POST /api/checkout`), that prices the cart. It writes **one JSON log line per request** to Vercel runtime logs:
+
+```json
+{"ts":"…","level":"error","service":"checkout","event":"checkout","requestId":"…","status":500,"durationMs":3,"fault":null,"errorType":"TypeError","error":"…","stack":"…","deploymentId":"dpl_…"}
+```
+
+- `level`: `info` (200), `warn` (400, bad input), `error` (500, a bug). A function timeout shows up as a 504 with no JSON line.
+- Read logs: `cd frontend && vercel logs <deployment-url>`
+- Fault injection for demos: the Vercel env var `CHECKOUT_FAULT` = `error` | `slow` | `bad-promo` (optional `CHECKOUT_FAULT_RATE` 0..1). Do not change it unless the task asks you to.
+- Synthetic monitor: `BASE_URL=<deployment-url> npm run synthetic --prefix frontend` — exits non-zero if checkout is broken. It also runs every 15 minutes against production.
+
+When fixing an incident: reproduce it from the log line (`error`, `stack`, `requestId`), add a regression test in `frontend/tests/`, deploy a preview, and run the synthetic monitor against the **preview URL**. Include the result in the Jira comment.
+
 ## How to Work on Tasks
 
 ### 1. Create a feature branch
@@ -47,7 +62,8 @@ git checkout -b feature/PZG-<number>-<short-name>
 - Types in `frontend/src/types.ts`
 - Styles in `frontend/src/App.css`
 - **Important:** When adding new API calls, always provide mock data fallback using `tryFetch()` so the feature works on Vercel without a live backend
-- Run `cd frontend && npm run lint && npm run build` to verify
+- Server code (Vercel Functions) in `frontend/api/`, its tests in `frontend/tests/`
+- Run `cd frontend && npm run lint && npm run build && npm test` to verify
 
 ### 4. CI
 
