@@ -20,3 +20,11 @@ export interface CartItem {
   pizza: Pizza;
   quantity: number;
 }
+
+export interface CheckoutQuote {
+  subtotal: number;
+  discount: number;
+  total: number;
+  promoCode: string | null;
+  currency: 'USD';
+}

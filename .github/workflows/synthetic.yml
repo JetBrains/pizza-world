@@ -1,0 +1,25 @@
+name: Synthetic checkout
+
+# Generates steady traffic to /api/checkout so Vercel always has fresh runtime logs,
+# and fails when production checkout is broken.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Deployment URL to check
+        default: https://pizza-world-github.vercel.app
+
+jobs:
+  synthetic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node frontend/scripts/synthetic-checkout.mjs
+        env:
+          BASE_URL: ${{ inputs.base_url || 'https://pizza-world-github.vercel.app' }}
+          ROUNDS: 3

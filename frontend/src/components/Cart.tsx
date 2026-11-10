@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CartItem } from '../types';
-import { createOrder } from '../api';
+import { checkout, createOrder } from '../api';
 
 interface Props {
   items: CartItem[];
@@ -15,7 +15,23 @@ export function Cart({ items, onRemove, onOrderPlaced, open, onClose }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const total = items.reduce((sum, item) => sum + item.pizza.price * item.quantity, 0);
+  const localTotal = items.reduce((sum, item) => sum + item.pizza.price * item.quantity, 0);
+  const cartKey = items.map(item => `${item.pizza.id}x${item.quantity}`).join(',');
+  const [quote, setQuote] = useState<{ key: string; total: number } | null>(null);
+
+  // Price the cart on the server (/api/checkout); show the local total until the quote arrives.
+  useEffect(() => {
+    if (items.length === 0) return;
+    let cancelled = false;
+    checkout(items).then(q => {
+      if (!cancelled) setQuote({ key: cartKey, total: q.total });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [items, cartKey]);
+
+  const total = quote?.key === cartKey ? quote.total : localTotal;
 
   const handleOrder = async () => {
     if (!customerName.trim() || items.length === 0) return;
