@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { PizzaMenu } from './components/PizzaMenu';
 import { Cart } from './components/Cart';
 import { Orders } from './components/Orders';
@@ -15,15 +15,13 @@ const heroImages = [
   'https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=1920&q=80',
 ];
 
+// Picked once per page load, outside render, to keep components pure.
+const heroSrc = heroImages[Math.floor(Math.random() * heroImages.length)];
+
 function App() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [tab, setTab] = useState<Tab>('menu');
   const [cartOpen, setCartOpen] = useState(false);
-
-  const heroSrc = useMemo(
-    () => heroImages[Math.floor(Math.random() * heroImages.length)],
-    []
-  );
 
   const addToCart = useCallback((pizza: CartItem['pizza']) => {
     setCart(prev => {
