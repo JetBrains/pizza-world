@@ -4,10 +4,11 @@
  * Runs as a Vercel Function so that real runtime logs exist for the incident pipeline.
  * Every request emits exactly one structured JSON log line (see `log()`).
  *
- * Fault injection ("knob") for incident demos — set in the Vercel project env and redeploy:
- *   CHECKOUT_FAULT       = error | slow | bad-promo   (unset = healthy)
- *   CHECKOUT_FAULT_RATE  = 0..1, share of requests affected (default 1)
+ * Fault injection ("knob") for incident demos:
+ *   1. Chaos API (preferred, no redeploy): POST /api/chaos — state in Edge Config, read on every request.
+ *   2. Fallback: env CHECKOUT_FAULT = error | slow | bad-promo, CHECKOUT_FAULT_RATE = 0..1 (needs a redeploy).
  */
+import { get } from '@vercel/edge-config';
 
 export type Fault = 'error' | 'slow' | 'bad-promo';
 
@@ -95,11 +96,33 @@ export function priceOrder(input: unknown, fault: Fault | null = null): Quote {
   return { lines, subtotal, discount, total: round2(subtotal - discount), promoCode: appliedCode, currency: 'USD' };
 }
 
-export function activeFault(env: Record<string, string | undefined> = process.env, random = Math.random): Fault | null {
+/** Fault from the Chaos API state stored in Edge Config (see api/chaos.ts). Expired state is ignored. */
+export function faultFromChaosState(state: unknown, now = Date.now(), random = Math.random): Fault | null {
+  const s = state as { active?: unknown; scenario?: unknown; rate?: unknown; until?: unknown } | null;
+  if (!s || s.active !== true || typeof s.until !== 'string' || !(Date.parse(s.until) > now)) return null;
+  if (s.scenario !== 'error' && s.scenario !== 'slow' && s.scenario !== 'bad-promo') return null;
+  const rate = typeof s.rate === 'number' ? s.rate : 1;
+  return random() < rate ? s.scenario : null;
+}
+
+/** Fallback knob: CHECKOUT_FAULT / CHECKOUT_FAULT_RATE env vars (require a redeploy to change). */
+export function faultFromEnv(env: Record<string, string | undefined> = process.env, random = Math.random): Fault | null {
   const fault = env.CHECKOUT_FAULT;
   if (fault !== 'error' && fault !== 'slow' && fault !== 'bad-promo') return null;
   const rate = env.CHECKOUT_FAULT_RATE === undefined ? 1 : Number(env.CHECKOUT_FAULT_RATE);
   return random() < rate ? fault : null;
+}
+
+async function activeFault(): Promise<Fault | null> {
+  if (process.env.EDGE_CONFIG) {
+    try {
+      const fault = faultFromChaosState(await get('chaos'));
+      if (fault) return fault;
+    } catch (e) {
+      log('warn', { event: 'chaos-read-failed', error: String(e) });
+    }
+  }
+  return faultFromEnv();
 }
 
 type Level = 'info' | 'warn' | 'error';
@@ -124,7 +147,7 @@ const json = (body: unknown, status = 200) =>
 export async function POST(request: Request): Promise<Response> {
   const started = Date.now();
   const requestId = request.headers.get('x-vercel-id') ?? crypto.randomUUID();
-  const fault = activeFault();
+  const fault = await activeFault();
   const base = { event: 'checkout', requestId, fault };
 
   try {

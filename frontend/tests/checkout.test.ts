@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { priceOrder, activeFault, CheckoutError } from '../api/checkout.ts';
+import { priceOrder, faultFromEnv, faultFromChaosState, CheckoutError } from '../api/checkout.ts';
 
 test('prices a single pizza', () => {
   const q = priceOrder({ items: [{ pizzaId: 1, quantity: 1 }] });
@@ -39,10 +39,21 @@ test('bad-promo fault turns an unknown code into a TypeError (HTTP 500)', () => 
   assert.equal(priceOrder({ items: [{ pizzaId: 3, quantity: 2 }], promoCode: 'PIZZA10' }, 'bad-promo').total, 27);
 });
 
-test('activeFault reads env and rate', () => {
-  assert.equal(activeFault({}), null);
-  assert.equal(activeFault({ CHECKOUT_FAULT: 'nonsense' }), null);
-  assert.equal(activeFault({ CHECKOUT_FAULT: 'error' }), 'error');
-  assert.equal(activeFault({ CHECKOUT_FAULT: 'slow', CHECKOUT_FAULT_RATE: '0.5' }, () => 0.4), 'slow');
-  assert.equal(activeFault({ CHECKOUT_FAULT: 'slow', CHECKOUT_FAULT_RATE: '0.5' }, () => 0.6), null);
+test('faultFromEnv reads env and rate', () => {
+  assert.equal(faultFromEnv({}), null);
+  assert.equal(faultFromEnv({ CHECKOUT_FAULT: 'nonsense' }), null);
+  assert.equal(faultFromEnv({ CHECKOUT_FAULT: 'error' }), 'error');
+  assert.equal(faultFromEnv({ CHECKOUT_FAULT: 'slow', CHECKOUT_FAULT_RATE: '0.5' }, () => 0.4), 'slow');
+  assert.equal(faultFromEnv({ CHECKOUT_FAULT: 'slow', CHECKOUT_FAULT_RATE: '0.5' }, () => 0.6), null);
+});
+
+test('faultFromChaosState honours active flag, TTL and rate', () => {
+  const now = Date.parse('2026-01-01T12:00:00Z');
+  const state = { active: true, scenario: 'bad-promo', rate: 0.5, until: '2026-01-01T12:30:00Z' };
+  assert.equal(faultFromChaosState(state, now, () => 0.1), 'bad-promo');
+  assert.equal(faultFromChaosState(state, now, () => 0.9), null);
+  assert.equal(faultFromChaosState(state, Date.parse('2026-01-01T12:31:00Z'), () => 0.1), null);
+  assert.equal(faultFromChaosState({ active: false, disabledAt: '2026-01-01T12:00:00Z' }, now), null);
+  assert.equal(faultFromChaosState({ ...state, scenario: 'nope' }, now, () => 0.1), null);
+  assert.equal(faultFromChaosState(null, now), null);
 });
