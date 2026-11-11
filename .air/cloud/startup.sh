@@ -50,10 +50,22 @@ log "npm ci (frontend)"
 log "npm ci done"
 
 # Vercel CLI is used by the AGENTS.md workflow to deploy previews.
-if ! command -v vercel >/dev/null 2>&1; then
-  log "installing vercel CLI"
-  npm install -g vercel --no-audit --no-fund 2>/dev/null || sudo -E npm install -g vercel --no-audit --no-fund
+# Installed into ~/.local (the nvm-managed global prefix is not user-writable).
+if [ ! -x "$HOME/.local/bin/vercel" ]; then
+  log "installing vercel CLI into ~/.local"
+  npm install -g --prefix "$HOME/.local" vercel --no-audit --no-fund
+  log "vercel CLI installed"
 fi
+ENV_FILE="$HOME/.air/pizza-world-env.sh"
+echo 'case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac' > "$ENV_FILE"
+SOURCE_LINE="[ -f \"$ENV_FILE\" ] && . \"$ENV_FILE\" # pizza-world-air-env"
+profile="$HOME/.profile"
+for f in "$HOME/.bash_profile" "$HOME/.bash_login" "$HOME/.profile"; do
+  if [ -f "$f" ]; then profile="$f"; break; fi
+done
+for f in "$profile" "$HOME/.bashrc"; do
+  grep -qF 'pizza-world-air-env' "$f" 2>/dev/null || echo "$SOURCE_LINE" >> "$f"
+done
 
 # Vite wrapper config: listen on 0.0.0.0 and accept the preview proxy's Host header
 # without changing the committed frontend/vite.config.ts.
