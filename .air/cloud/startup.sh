@@ -77,11 +77,12 @@ EOF
 # --- Start runtime servers in the background --------------------------------
 if ! curl -sf -o /dev/null http://localhost:8080/api/pizzas; then
   log "starting backend: ./gradlew bootRun (log: $LOG_DIR/backend.log)"
-  nohup ./gradlew bootRun >"$LOG_DIR/backend.log" 2>&1 &
+  nohup ./gradlew bootRun >"$LOG_DIR/backend.log" 2>&1 </dev/null &
 fi
 if ! curl -sf -o /dev/null http://localhost:3000/; then
   log "starting frontend: vite dev on :3000 (log: $LOG_DIR/frontend.log)"
-  (cd frontend && nohup npx vite --config "$HOME/.air/vite.config.mjs" >"$LOG_DIR/frontend.log" 2>&1 &)
+  # Redirect the whole subshell so no process keeps the startup log pipe open.
+  (cd frontend && exec nohup npx vite --config "$HOME/.air/vite.config.mjs") >"$LOG_DIR/frontend.log" 2>&1 </dev/null &
 fi
 
 healthcheck() {
