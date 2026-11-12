@@ -22,6 +22,11 @@ public class PizzaController {
         return pizzaRepository.findAll();
     }
 
+    @GetMapping("/top")
+    public List<Pizza> getTopPizzas() {
+        return pizzaRepository.findAllOrderByRatingDesc();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Pizza> getPizzaById(@PathVariable Long id) {
         return pizzaRepository.findById(id)
@@ -30,7 +35,11 @@ public class PizzaController {
     }
 
     @PostMapping
-    public Pizza createPizza(@RequestBody Pizza pizza) {
-        return pizzaRepository.save(pizza);
+    public ResponseEntity<Pizza> createPizza(@RequestBody Pizza pizza) {
+        Integer rating = pizza.getRating();
+        if (rating != null && (rating < 1 || rating > 5)) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(pizzaRepository.save(pizza));
     }
 }

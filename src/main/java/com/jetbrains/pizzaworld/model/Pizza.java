@@ -17,14 +17,22 @@ public class Pizza {
     private double price;
     private String size;
 
+    /** Customer rating from 1 to 5; {@code null} for a pizza that has not been rated yet. */
+    private Integer rating;
+
     public Pizza() {
     }
 
     public Pizza(String name, String description, double price, String size) {
+        this(name, description, price, size, null);
+    }
+
+    public Pizza(String name, String description, double price, String size, Integer rating) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.size = size;
+        this.rating = rating;
     }
 
     public Long getId() {
@@ -65,5 +73,13 @@ public class Pizza {
 
     public void setSize(String size) {
         this.size = size;
+    }
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
     }
 }
