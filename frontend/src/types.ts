@@ -28,3 +28,17 @@ export interface CheckoutQuote {
   promoCode: string | null;
   currency: 'USD';
 }
+
+export interface Review {
+  id: number;
+  orderId: number | null;
+  text: string;
+  rating: number;
+  createdAt: string;
+}
+
+export interface NewReview {
+  orderId: number | null;
+  text: string;
+  rating: number;
+}

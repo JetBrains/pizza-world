@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { PizzaMenu } from './components/PizzaMenu';
 import { Cart } from './components/Cart';
 import { Orders } from './components/Orders';
+import { Reviews } from './components/Reviews';
 import type { CartItem } from './types';
 import './App.css';
 
@@ -91,6 +92,8 @@ function App() {
             <section className="gallery">
               <PizzaMenu onAddToCart={addToCart} />
             </section>
+
+            <Reviews />
           </>
         ) : (
           <Orders />
