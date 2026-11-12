@@ -509,6 +509,129 @@ body {
   font-weight: 300;
 }
 
+/* ===================== REVIEWS ===================== */
+.reviews {
+  padding: 80px 40px 100px;
+  max-width: 720px;
+}
+
+.reviews-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  margin-bottom: 40px;
+}
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 60px;
+}
+
+.review-rating {
+  display: flex;
+  gap: 4px;
+}
+
+.review-rating-star {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--color-border);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.review-rating-star.active,
+.review-rating-star:hover {
+  color: var(--color-text);
+}
+
+.review-form textarea,
+.review-form input {
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 300;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.3s;
+}
+
+.review-form textarea:focus,
+.review-form input:focus {
+  border-color: var(--color-text);
+}
+
+.review-form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.review-form-row input {
+  flex: 1;
+}
+
+.review-form-row .btn-order {
+  padding: 14px 28px;
+}
+
+.review-error {
+  font-size: 0.8rem;
+  color: #c62828;
+  font-weight: 300;
+}
+
+.reviews-list {
+  list-style: none;
+  border-top: 1px solid var(--color-border);
+}
+
+.review-item {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.review-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.review-stars {
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  color: var(--color-text);
+}
+
+.review-stars-empty {
+  color: var(--color-border);
+}
+
+.review-date,
+.review-order {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  font-weight: 300;
+}
+
+.review-text {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.reviews-empty {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  font-weight: 300;
+}
+
 /* ===================== FOOTER ===================== */
 .footer {
   padding: 60px 40px;
@@ -606,6 +729,14 @@ body {
 
   .orders-page {
     padding: 100px 20px 60px;
+  }
+
+  .reviews {
+    padding: 60px 20px 80px;
+  }
+
+  .review-form-row {
+    flex-direction: column;
   }
 
   .page-title {

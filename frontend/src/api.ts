@@ -1,4 +1,5 @@
-import type { Pizza, PizzaOrder, OrderStatus, CartItem, CheckoutQuote } from './types';
+import type { Pizza, PizzaOrder, OrderStatus, CartItem, CheckoutQuote, Review, NewReview } from './types';
+import { buildLocalReview, validateReview } from './reviews.ts';
 
 const API_BASE = '/api';
 
@@ -11,12 +12,35 @@ const mockPizzas: Pizza[] = [
   { id: 6, name: 'Napoletana', description: 'Tomato sauce, mozzarella, anchovies, capers, olives', price: 14, size: '30 cm' },
 ];
 
-async function tryFetch<T>(url: string, options?: RequestInit, fallback?: T): Promise<T> {
+const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+const mockReviews: Review[] = [
+  { id: 3, orderId: null, text: 'Thin, airy crust and the basil tastes like summer. Best Margherita in town.', rating: 5, createdAt: daysAgo(1) },
+  { id: 2, orderId: null, text: 'Diavola had a proper kick. Delivery took a little longer than promised.', rating: 4, createdAt: daysAgo(3) },
+  { id: 1, orderId: null, text: 'Quattro Formaggi was rich and creamy, will order again.', rating: 5, createdAt: daysAgo(6) },
+];
+
+export class HttpError extends Error {
+  readonly status: number;
+
+  constructor(status: number) {
+    super(`HTTP ${status}`);
+    this.status = status;
+  }
+}
+
+async function tryFetch<T>(
+  url: string,
+  options?: RequestInit,
+  fallback?: T,
+  canFallBack: (error: unknown) => boolean = () => true,
+): Promise<T> {
   try {
     const res = await fetch(url, options);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch {
+    if (!res.ok) throw new HttpError(res.status);
+    return (await res.json()) as T;
+  } catch (error) {
+    if (!canFallBack(error)) throw error;
     if (fallback !== undefined) return fallback;
     throw new Error(`API unavailable: ${url}`);
   }
@@ -53,4 +77,23 @@ export async function checkout(items: CartItem[]): Promise<CheckoutQuote> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ items: items.map(item => ({ pizzaId: item.pizza.id, quantity: item.quantity })) }),
   }, fallback);
+}
+
+export async function fetchReviews(): Promise<Review[]> {
+  return tryFetch(`${API_BASE}/reviews`, undefined, mockReviews);
+}
+
+/**
+ * Saves a review; without a backend (e.g. on Vercel) it returns a review built locally.
+ * A 400 from a live backend is not hidden by the fallback: it is thrown as an HttpError.
+ */
+export async function createReview(review: NewReview): Promise<Review> {
+  const invalid = validateReview(review);
+  if (invalid) throw new Error(invalid);
+  const body: NewReview = { orderId: review.orderId, text: review.text.trim(), rating: review.rating };
+  return tryFetch(`${API_BASE}/reviews`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }, buildLocalReview(body), error => !(error instanceof HttpError && error.status === 400));
 }
