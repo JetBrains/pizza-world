@@ -1,5 +1,6 @@
 package com.jetbrains.pizzaworld.controller;
 
+import com.jetbrains.pizzaworld.dto.OrderEta;
 import com.jetbrains.pizzaworld.dto.OrderRequest;
 import com.jetbrains.pizzaworld.model.OrderStatus;
 import com.jetbrains.pizzaworld.model.Pizza;
@@ -31,6 +32,14 @@ public class OrderController {
     @GetMapping("/{id}")
     public ResponseEntity<PizzaOrder> getOrderById(@PathVariable Long id) {
         return orderRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/eta")
+    public ResponseEntity<OrderEta> getOrderEta(@PathVariable Long id) {
+        return orderRepository.findById(id)
+                .map(OrderEta::of)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

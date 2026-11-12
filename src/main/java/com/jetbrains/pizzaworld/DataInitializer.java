@@ -17,12 +17,12 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (pizzaRepository.count() == 0) {
-            pizzaRepository.save(new Pizza("Margherita", "Classic tomato sauce, mozzarella, fresh basil", 8.99, "Medium"));
-            pizzaRepository.save(new Pizza("Pepperoni", "Tomato sauce, mozzarella, pepperoni", 10.99, "Medium"));
-            pizzaRepository.save(new Pizza("Hawaiian", "Tomato sauce, mozzarella, ham, pineapple", 11.49, "Medium"));
-            pizzaRepository.save(new Pizza("Quattro Formaggi", "Mozzarella, gorgonzola, parmesan, fontina", 12.99, "Large"));
-            pizzaRepository.save(new Pizza("Diavola", "Tomato sauce, mozzarella, spicy salami, chili flakes", 11.99, "Medium"));
-            pizzaRepository.save(new Pizza("Veggie Supreme", "Tomato sauce, mozzarella, bell peppers, mushrooms, olives, onions", 10.49, "Large"));
+            pizzaRepository.save(new Pizza("Margherita", "Classic tomato sauce, mozzarella, fresh basil", 8.99, "Medium", 10));
+            pizzaRepository.save(new Pizza("Pepperoni", "Tomato sauce, mozzarella, pepperoni", 10.99, "Medium", 12));
+            pizzaRepository.save(new Pizza("Hawaiian", "Tomato sauce, mozzarella, ham, pineapple", 11.49, "Medium", 13));
+            pizzaRepository.save(new Pizza("Quattro Formaggi", "Mozzarella, gorgonzola, parmesan, fontina", 12.99, "Large", 15));
+            pizzaRepository.save(new Pizza("Diavola", "Tomato sauce, mozzarella, spicy salami, chili flakes", 11.99, "Medium", 12));
+            pizzaRepository.save(new Pizza("Veggie Supreme", "Tomato sauce, mozzarella, bell peppers, mushrooms, olives, onions", 10.49, "Large", 18));
         }
     }
 }
