@@ -31,7 +31,7 @@ public class ReviewController {
         if (!isValid(request)) {
             return ResponseEntity.badRequest().build();
         }
-        Review review = new Review(request.orderId(), request.text().trim(), request.rating());
+        Review review = new Review(request.orderId(), request.text().trim(), request.rating().intValue());
         return ResponseEntity.ok(reviewRepository.save(review));
     }
 
@@ -45,7 +45,8 @@ public class ReviewController {
     }
 
     private boolean isValid(ReviewRequest request) {
-        if (request == null || request.rating() == null || request.rating() < 1 || request.rating() > 5) {
+        Double rating = request == null ? null : request.rating();
+        if (rating == null || rating % 1 != 0 || rating < 1 || rating > 5) {
             return false;
         }
         if (request.text() == null || request.text().isBlank() || request.text().trim().length() > Review.MAX_TEXT_LENGTH) {

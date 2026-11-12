@@ -105,6 +105,11 @@ class ReviewControllerTest {
     }
 
     @Test
+    void shouldRejectFractionalRating() throws Exception {
+        assertRejected("{\"text\":\"Nice\",\"rating\":4.5}");
+    }
+
+    @Test
     void shouldRejectMissingRating() throws Exception {
         assertRejected("{\"text\":\"Nice\"}");
     }

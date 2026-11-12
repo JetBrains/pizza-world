@@ -20,6 +20,9 @@ const mockReviews: Review[] = [
   { id: 1, orderId: null, text: 'Quattro Formaggi was rich and creamy, will order again.', rating: 5, createdAt: daysAgo(6) },
 ];
 
+// Reviews saved in the browser while the backend is unavailable; kept for the page session so they survive remounts.
+const localReviews: Review[] = [];
+
 export class HttpError extends Error {
   readonly status: number;
 
@@ -27,6 +30,11 @@ export class HttpError extends Error {
     super(`HTTP ${status}`);
     this.status = status;
   }
+}
+
+/** True when nothing answers behind /api (network error, or 404/502-504 as on Vercel or a Vite proxy without a backend). */
+function isBackendUnavailable(error: unknown): boolean {
+  return !(error instanceof HttpError) || [404, 502, 503, 504].includes(error.status);
 }
 
 async function tryFetch<T>(
@@ -80,20 +88,23 @@ export async function checkout(items: CartItem[]): Promise<CheckoutQuote> {
 }
 
 export async function fetchReviews(): Promise<Review[]> {
-  return tryFetch(`${API_BASE}/reviews`, undefined, mockReviews);
+  return tryFetch(`${API_BASE}/reviews`, undefined, [...localReviews, ...mockReviews], isBackendUnavailable);
 }
 
 /**
- * Saves a review; without a backend (e.g. on Vercel) it returns a review built locally.
- * A 400 from a live backend is not hidden by the fallback: it is thrown as an HttpError.
+ * Saves a review; without a backend (e.g. on Vercel) it keeps a review built locally.
+ * Errors from a live backend (400, 500, ...) are not hidden by the fallback: they are thrown as HttpError.
  */
 export async function createReview(review: NewReview): Promise<Review> {
   const invalid = validateReview(review);
   if (invalid) throw new Error(invalid);
   const body: NewReview = { orderId: review.orderId, text: review.text.trim(), rating: review.rating };
-  return tryFetch(`${API_BASE}/reviews`, {
+  const local = buildLocalReview(body);
+  const saved = await tryFetch(`${API_BASE}/reviews`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-  }, buildLocalReview(body), error => !(error instanceof HttpError && error.status === 400));
+  }, local, isBackendUnavailable);
+  if (saved === local) localReviews.unshift(local);
+  return saved;
 }

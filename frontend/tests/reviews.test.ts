@@ -87,18 +87,28 @@ test('createReview posts a trimmed review and returns the saved one', async () =
   assert.deepEqual(JSON.parse(String(calls[0].body)), { orderId: null, text: 'Lovely', rating: 5 });
 });
 
-test('createReview builds a local review when there is no backend', async () => {
-  stubFetch(() => new Response('Not Found', { status: 404 }));
-  const local = await createReview({ rating: 3, text: 'Offline but tasty', orderId: null });
-  assert.equal(local.text, 'Offline but tasty');
-  assert.equal(local.rating, 3);
-  assert.ok(local.id < 0);
+test('createReview keeps a local review when there is no backend, and fetchReviews still lists it', async () => {
+  for (const status of [404, 502]) {
+    stubFetch(() => new Response('No backend', { status }));
+    const local = await createReview({ rating: 3, text: `Offline but tasty ${status}`, orderId: null });
+    assert.equal(local.text, `Offline but tasty ${status}`);
+    assert.equal(local.rating, 3);
+    assert.ok(local.id < 0);
+    assert.equal((await fetchReviews())[0].id, local.id, 'survives a refetch, e.g. after switching tabs');
+  }
 });
 
-test('createReview does not hide a 400 from a live backend behind the fallback', async () => {
-  stubFetch(() => new Response(null, { status: 400 }));
-  await assert.rejects(createReview({ rating: 3, text: 'Unknown order', orderId: 999 }),
-    (err: unknown) => err instanceof HttpError && err.status === 400);
+test('createReview does not hide errors from a live backend behind the fallback', async () => {
+  for (const status of [400, 500]) {
+    stubFetch(() => new Response(null, { status }));
+    await assert.rejects(createReview({ rating: 3, text: 'Unknown order', orderId: 999 }),
+      (err: unknown) => err instanceof HttpError && err.status === status);
+  }
+});
+
+test('fetchReviews does not hide a 500 from a live backend behind mock reviews', async () => {
+  stubFetch(() => new Response(null, { status: 500 }));
+  await assert.rejects(fetchReviews(), (err: unknown) => err instanceof HttpError && err.status === 500);
 });
 
 test('createReview rejects invalid input without calling the API', async () => {

@@ -6,10 +6,11 @@ import { MAX_RATING, MAX_REVIEW_LENGTH, parseOrderId, sortNewestFirst, validateR
 const ratings = Array.from({ length: MAX_RATING }, (_, i) => i + 1);
 
 function Stars({ rating }: { rating: number }) {
+  const filled = Math.min(MAX_RATING, Math.max(0, Math.round(rating) || 0));
   return (
-    <span className="review-stars" aria-label={`${rating} out of ${MAX_RATING}`}>
-      {'★'.repeat(rating)}
-      <span className="review-stars-empty">{'★'.repeat(MAX_RATING - rating)}</span>
+    <span className="review-stars" aria-label={`${filled} out of ${MAX_RATING}`}>
+      {'★'.repeat(filled)}
+      <span className="review-stars-empty">{'★'.repeat(MAX_RATING - filled)}</span>
     </span>
   );
 }
@@ -17,6 +18,7 @@ function Stars({ rating }: { rating: number }) {
 export function Reviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [rating, setRating] = useState(0);
   const [text, setText] = useState('');
   const [orderId, setOrderId] = useState('');
@@ -24,14 +26,13 @@ export function Reviews() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchReviews().then(data => {
-      setReviews(sortNewestFirst(data));
-      setLoading(false);
-    });
+    fetchReviews()
+      .then(data => setReviews(sortNewestFirst(data)))
+      .catch(() => setLoadFailed(true))
+      .finally(() => setLoading(false));
   }, []);
 
   const draft = { rating, text, orderId: parseOrderId(orderId) };
-  const canSubmit = !submitting && validateReview(draft) === null;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -51,7 +52,7 @@ export function Reviews() {
     } catch (err) {
       setError(err instanceof HttpError && err.status === 400
         ? 'We could not save this review. Check the order number and try again.'
-        : 'Something went wrong. Please try again.');
+        : 'We could not save this review right now. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -92,7 +93,7 @@ export function Reviews() {
             value={orderId}
             onChange={e => setOrderId(e.target.value)}
           />
-          <button type="submit" className="btn-order" disabled={!canSubmit}>
+          <button type="submit" className="btn-order" disabled={submitting}>
             {submitting ? 'Sending...' : 'Leave a review'}
           </button>
         </div>
@@ -101,6 +102,8 @@ export function Reviews() {
 
       {loading ? (
         <div className="loading">Loading reviews...</div>
+      ) : loadFailed && reviews.length === 0 ? (
+        <p className="reviews-empty">Reviews are unavailable right now.</p>
       ) : reviews.length === 0 ? (
         <p className="reviews-empty">No reviews yet. Be the first.</p>
       ) : (
