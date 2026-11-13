@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Pizza {
@@ -16,6 +17,9 @@ public class Pizza {
     private String description;
     private double price;
     private String size;
+
+    @ManyToOne
+    private Category category;
 
     public Pizza() {
     }
@@ -65,5 +69,13 @@ public class Pizza {
 
     public void setSize(String size) {
         this.size = size;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }

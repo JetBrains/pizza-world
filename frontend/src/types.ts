@@ -1,9 +1,15 @@
+export interface Category {
+  id: number;
+  name: string;
+}
+
 export interface Pizza {
   id: number;
   name: string;
   description: string;
   price: number;
   size: string;
+  category: Category | null;
 }
 
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'DELIVERED' | 'CANCELLED';
