@@ -57,6 +57,7 @@ export function PizzaMenu({ onAddToCart }: Props) {
             <p className="gallery-desc">{pizza.description}</p>
             <div className="gallery-meta">
               <span className="gallery-price">${pizza.price}</span>
+              <span className="gallery-prep" title="Preparation time">~{pizza.prepTimeMinutes} min</span>
               <span className="gallery-size">{pizza.size}</span>
             </div>
             <button

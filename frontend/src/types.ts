@@ -4,6 +4,7 @@ export interface Pizza {
   description: string;
   price: number;
   size: string;
+  prepTimeMinutes: number;
 }
 
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'DELIVERED' | 'CANCELLED';
