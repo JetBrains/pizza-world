@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import type { Pizza } from '../types';
-import { fetchPizzas } from '../api';
+import type { Category, Pizza } from '../types';
+import { fetchCategories, fetchPizzas } from '../api';
+import { filterPizzasByCategory, type CategoryFilter } from '../menuFilter';
 
 interface Props {
   onAddToCart: (pizza: Pizza) => void;
@@ -26,20 +27,42 @@ function getImageForPizza(name: string): string {
 
 export function PizzaMenu({ onAddToCart }: Props) {
   const [pizzas, setPizzas] = useState<Pizza[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchPizzas().then(data => {
-      setPizzas(data);
+    Promise.all([fetchPizzas(), fetchCategories()]).then(([pizzaData, categoryData]) => {
+      setPizzas(pizzaData);
+      setCategories(categoryData);
       setLoading(false);
     });
   }, []);
 
   if (loading) return <div className="loading">Loading...</div>;
 
+  const tabs: { id: CategoryFilter; name: string }[] = [{ id: null, name: 'All' }, ...categories];
+  const visiblePizzas = filterPizzasByCategory(pizzas, selectedCategory);
+
   return (
     <>
-      {pizzas.map((pizza, i) => (
+      <div className="menu-filters" role="tablist" aria-label="Filter menu by category">
+        {tabs.map(tab => (
+          <button
+            key={tab.id ?? 'all'}
+            role="tab"
+            aria-selected={selectedCategory === tab.id}
+            className={`menu-filter ${selectedCategory === tab.id ? 'active' : ''}`}
+            onClick={() => setSelectedCategory(tab.id)}
+          >
+            {tab.name}
+          </button>
+        ))}
+      </div>
+      {visiblePizzas.length === 0 && (
+        <p className="menu-empty">No pizzas in this category yet.</p>
+      )}
+      {visiblePizzas.map((pizza, i) => (
         <div
           key={pizza.id}
           className={`gallery-item ${i % 2 === 1 ? 'reverse' : ''}`}
