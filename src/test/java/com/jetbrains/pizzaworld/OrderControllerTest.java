@@ -4,6 +4,7 @@ import com.jetbrains.pizzaworld.model.Pizza;
 import com.jetbrains.pizzaworld.model.PizzaOrder;
 import com.jetbrains.pizzaworld.repository.OrderRepository;
 import com.jetbrains.pizzaworld.repository.PizzaRepository;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -14,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -78,12 +80,15 @@ class OrderControllerTest {
         // Reload, as the database stores createdAt with less precision than LocalDateTime.now()
         LocalDateTime createdAt = orderRepository.findById(order.getId()).orElseThrow().getCreatedAt();
 
-        mockMvc.perform(get("/api/orders/" + order.getId() + "/eta"))
+        String response = mockMvc.perform(get("/api/orders/" + order.getId() + "/eta"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderId").value(order.getId()))
                 .andExpect(jsonPath("$.prepTimeMinutes").value(expectedMinutes))
-                .andExpect(jsonPath("$.estimatedReadyAt")
-                        .value(createdAt.plusMinutes(expectedMinutes).toString()));
+                .andReturn().getResponse().getContentAsString();
+
+        // Compare as LocalDateTime: JSON drops trailing zeros of the fraction (.937610 -> .93761)
+        LocalDateTime estimatedReadyAt = LocalDateTime.parse(JsonPath.read(response, "$.estimatedReadyAt"));
+        assertEquals(createdAt.plusMinutes(expectedMinutes), estimatedReadyAt);
     }
 
     @Test
