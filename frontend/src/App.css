@@ -196,7 +196,7 @@ body {
 }
 
 .star {
-  color: var(--color-border);
+  color: #888;
 }
 
 .star.filled {
