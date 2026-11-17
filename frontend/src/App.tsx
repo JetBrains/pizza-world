@@ -8,11 +8,11 @@ import './App.css';
 type Tab = 'menu' | 'orders';
 
 const heroImages = [
-  'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=1920&q=80',
-  'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1920&q=80',
-  'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1920&q=80',
-  'https://images.unsplash.com/photo-1588315029754-2dd089d39a1a?w=1920&q=80',
-  'https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=1920&q=80',
+  '/images/hero/hero-1.jpg',
+  '/images/hero/hero-2.jpg',
+  '/images/hero/hero-3.jpg',
+  '/images/hero/hero-4.jpg',
+  '/images/hero/hero-5.jpg',
 ];
 
 // Picked once per page load, outside render, to keep components pure.
