@@ -7,15 +7,15 @@ interface Props {
 }
 
 const pizzaImages: Record<string, string> = {
-  'Margherita': 'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=800&q=80',
-  'Pepperoni': 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=800&q=80',
-  'Quattro Formaggi': 'https://images.unsplash.com/photo-1573821663912-569905455b1c?w=800&q=80',
-  'Diavola': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80',
-  'Prosciutto': 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80',
-  'Napoletana': 'https://images.unsplash.com/photo-1588315029754-2dd089d39a1a?w=800&q=80',
+  'Margherita': '/images/pizzas/margherita.svg',
+  'Pepperoni': '/images/pizzas/pepperoni.svg',
+  'Quattro Formaggi': '/images/pizzas/quattro-formaggi.svg',
+  'Diavola': '/images/pizzas/diavola.svg',
+  'Prosciutto': '/images/pizzas/prosciutto.svg',
+  'Napoletana': '/images/pizzas/napoletana.svg',
 };
 
-const defaultImage = 'https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=800&q=80';
+const defaultImage = '/images/pizzas/classic.svg';
 
 function getImageForPizza(name: string): string {
   for (const [key, url] of Object.entries(pizzaImages)) {
