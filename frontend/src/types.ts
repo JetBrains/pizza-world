@@ -4,6 +4,8 @@ export interface Pizza {
   description: string;
   price: number;
   size: string;
+  /** 1–5 stars; null when the pizza has not been rated yet. */
+  rating: number | null;
 }
 
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'DELIVERED' | 'CANCELLED';

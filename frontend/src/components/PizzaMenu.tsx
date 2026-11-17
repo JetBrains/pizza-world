@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Pizza } from '../types';
 import { fetchPizzas } from '../api';
+import { StarRating } from './StarRating';
 
 interface Props {
   onAddToCart: (pizza: Pizza) => void;
@@ -54,6 +55,7 @@ export function PizzaMenu({ onAddToCart }: Props) {
           </div>
           <div className="gallery-info">
             <h3 className="gallery-name">{pizza.name}</h3>
+            <StarRating rating={pizza.rating} />
             <p className="gallery-desc">{pizza.description}</p>
             <div className="gallery-meta">
               <span className="gallery-price">${pizza.price}</span>
