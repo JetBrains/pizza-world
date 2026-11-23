@@ -53,7 +53,16 @@ const SLOW_FAULT_MS = 8000; // longer than maxDuration (5s) in vercel.json -> fu
 /** Client error: invalid input, returned as HTTP 400. */
 export class CheckoutError extends Error {
   readonly status = 400;
+  /** Machine-readable reason, so the client can tell an invalid promo code from other bad input. */
+  readonly code: string | null;
+
+  constructor(message: string, code: string | null = null) {
+    super(message);
+    this.code = code;
+  }
 }
+
+export const INVALID_PROMO_CODE = 'INVALID_PROMO_CODE';
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -87,7 +96,7 @@ export function priceOrder(input: unknown, fault: Fault | null = null): Quote {
       // so an unknown code crashes with a TypeError (HTTP 500) instead of a 400.
       discount = round2((subtotal * (promo as { discountPercent: number }).discountPercent) / 100);
     } else {
-      if (!promo) throw new CheckoutError(`Unknown promo code: ${code}`);
+      if (!promo) throw new CheckoutError(`Unknown promo code: ${code}`, INVALID_PROMO_CODE);
       discount = round2((subtotal * promo.discountPercent) / 100);
     }
     appliedCode = code;
@@ -169,7 +178,7 @@ export async function POST(request: Request): Promise<Response> {
   } catch (e) {
     if (e instanceof CheckoutError) {
       log('warn', { ...base, status: 400, durationMs: Date.now() - started, error: e.message });
-      return json({ error: e.message, requestId }, 400);
+      return json({ error: e.message, ...(e.code ? { code: e.code } : {}), requestId }, 400);
     }
     const err = e instanceof Error ? e : new Error(String(e));
     log('error', { ...base, status: 500, durationMs: Date.now() - started, errorType: err.name, error: err.message, stack: err.stack });

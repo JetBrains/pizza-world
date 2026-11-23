@@ -28,3 +28,9 @@ export interface CheckoutQuote {
   promoCode: string | null;
   currency: 'USD';
 }
+
+/** An accepted promo code, as returned by POST /api/promo/validate. */
+export interface PromoDiscount {
+  code: string;
+  discountPercent: number;
+}
