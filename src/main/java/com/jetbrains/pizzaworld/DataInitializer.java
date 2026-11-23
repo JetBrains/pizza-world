@@ -1,7 +1,9 @@
 package com.jetbrains.pizzaworld;
 
 import com.jetbrains.pizzaworld.model.Pizza;
+import com.jetbrains.pizzaworld.model.PromoCode;
 import com.jetbrains.pizzaworld.repository.PizzaRepository;
+import com.jetbrains.pizzaworld.repository.PromoCodeRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -9,9 +11,11 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements CommandLineRunner {
 
     private final PizzaRepository pizzaRepository;
+    private final PromoCodeRepository promoCodeRepository;
 
-    public DataInitializer(PizzaRepository pizzaRepository) {
+    public DataInitializer(PizzaRepository pizzaRepository, PromoCodeRepository promoCodeRepository) {
         this.pizzaRepository = pizzaRepository;
+        this.promoCodeRepository = promoCodeRepository;
     }
 
     @Override
@@ -23,6 +27,11 @@ public class DataInitializer implements CommandLineRunner {
             pizzaRepository.save(new Pizza("Quattro Formaggi", "Mozzarella, gorgonzola, parmesan, fontina", 12.99, "Large"));
             pizzaRepository.save(new Pizza("Diavola", "Tomato sauce, mozzarella, spicy salami, chili flakes", 11.99, "Medium"));
             pizzaRepository.save(new Pizza("Veggie Supreme", "Tomato sauce, mozzarella, bell peppers, mushrooms, olives, onions", 10.49, "Large"));
+        }
+        if (promoCodeRepository.count() == 0) {
+            // Keep in sync with PROMO_CODES in frontend/api/checkout.ts and MOCK_PROMO_CODES in frontend/src/api.ts.
+            promoCodeRepository.save(new PromoCode("PIZZA10", 10, true));
+            promoCodeRepository.save(new PromoCode("EXPIRED20", 20, false));
         }
     }
 }
